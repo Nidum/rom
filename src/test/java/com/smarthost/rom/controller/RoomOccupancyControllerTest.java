@@ -2,7 +2,6 @@ package com.smarthost.rom.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smarthost.rom.dto.RoomOccupancyResponse;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,10 +12,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static com.smarthost.rom.exception.Messages.ECONOMY_ONLY_POSITIVE_MSG;
 import static com.smarthost.rom.exception.Messages.PREMIUM_ONLY_POSITIVE_MSG;
+import static org.hamcrest.Matchers.*;
 import static org.skyscreamer.jsonassert.JSONCompareMode.STRICT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,28 +33,29 @@ public class RoomOccupancyControllerTest {
 
     @ParameterizedTest
     @MethodSource
-    public void controllerNegativeCases(String economy, String premium, String message) throws Exception {
+    public void controllerNegativeCases(String economy, String premium, List<String> messages) throws Exception {
         mockMvc.perform(get("/api/room/occupancy")
                 .param("economy", economy)
                 .param("premium", premium))
                 .andExpect(status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.message").value(message))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(400));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.messages")
+                        .value(containsInAnyOrder(messages.toArray())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status")
+                        .value(400));
     }
 
     private static Stream<Arguments> controllerNegativeCases() {
         return Stream.of(
-                Arguments.of("-1", "1", ECONOMY_ONLY_POSITIVE_MSG),
-                Arguments.of("1", "-1", PREMIUM_ONLY_POSITIVE_MSG),
-                Arguments.of("-1", "-1", ECONOMY_ONLY_POSITIVE_MSG + "; " + PREMIUM_ONLY_POSITIVE_MSG),
-                Arguments.of("test", "1", "Value 'test' is invalid for field economy"),
-                Arguments.of("1", "test", "Value 'test' is invalid for field premium")
+                Arguments.of("-1", "1", List.of(ECONOMY_ONLY_POSITIVE_MSG)),
+                Arguments.of("1", "-1", List.of(PREMIUM_ONLY_POSITIVE_MSG)),
+                Arguments.of("-1", "-1", List.of(ECONOMY_ONLY_POSITIVE_MSG, PREMIUM_ONLY_POSITIVE_MSG)),
+                Arguments.of("test", "1", List.of("Value 'test' is invalid for field economy")),
+                Arguments.of("1", "test", List.of("Value 'test' is invalid for field premium"))
         );
     }
 
     @ParameterizedTest
     @MethodSource
-    @Disabled("Needs service implementation to pass")
     public void controllerPositiveCases(String economy, String premium, RoomOccupancyResponse response) throws Exception {
         String actualResponse = mockMvc.perform(get("/api/room/occupancy")
                 .param("economy", economy)

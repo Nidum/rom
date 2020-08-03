@@ -44,10 +44,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex, WebRequest request) {
         var badRequest = HttpStatus.BAD_REQUEST;
-        String message = ex.getConstraintViolations()
+        var messages = ex.getConstraintViolations()
                 .stream()
                 .map(ConstraintViolation::getMessage)
-                .collect(Collectors.joining("; "));
-        return super.handleExceptionInternal(ex, new ErrorResponse(message, badRequest.value()), new HttpHeaders(), badRequest, request);
+                .collect(Collectors.toList());
+        return super.handleExceptionInternal(ex, new ErrorResponse(messages, badRequest.value()), new HttpHeaders(), badRequest, request);
     }
 }

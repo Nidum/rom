@@ -1,29 +1,28 @@
 package com.smarthost.rom.dto;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ErrorResponse implements Serializable {
-    private String message;
-    private int status;
+    private final List<String> messages;
+    private final int status;
 
     public ErrorResponse(String message, int status) {
-        this.message = message;
+        this.messages = List.of(message);
         this.status = status;
     }
 
-    public String getMessage() {
-        return message;
+    public ErrorResponse(List<String> messages, int status) {
+        this.messages = new ArrayList<>(messages);
+        this.status = status;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public List<String> getMessages() {
+        return new ArrayList<>(messages);
     }
 
     public int getStatus() {
         return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
     }
 }
