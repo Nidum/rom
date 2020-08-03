@@ -1,10 +1,15 @@
 package com.smarthost.rom.dto;
 
+import io.swagger.annotations.ApiModelProperty;
+
 import java.util.Objects;
 
 public class RoomOccupancyResponse {
+    @ApiModelProperty(value = "Count of economy rooms occupied", position = 1)
     private final int economy;
+    @ApiModelProperty(value = "Count of premium rooms occupied", position = 2)
     private final int premium;
+    @ApiModelProperty(value = "Final gain from occupied rooms", position = 3)
     private final int gain;
 
     public RoomOccupancyResponse(int economy, int premium, int gain) {
