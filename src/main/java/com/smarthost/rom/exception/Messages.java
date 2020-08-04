@@ -6,6 +6,8 @@ public final class Messages {
 
     }
 
+    public static final String PRICE_BOUNDARIES_VALIDATION = "Price boundaries cannot intersect. " +
+            "Check your price.properties file.";
     public static final String ECONOMY_ONLY_POSITIVE_MSG = "Economy rooms count cannot be negative";
     public static final String PREMIUM_ONLY_POSITIVE_MSG = "Premium rooms count cannot be negative";
     public static final String ROOMS_ONLY_POSITIVE_MSG = "Rooms count should be present and cannot be negative";

@@ -1,10 +1,13 @@
 package com.smarthost.rom.domain;
 
+import com.google.common.collect.Range;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import javax.annotation.PostConstruct;
+
+import static com.smarthost.rom.exception.Messages.PRICE_BOUNDARIES_VALIDATION;
 
 public enum RoomType {
     ECONOMY(1, 100),
@@ -27,27 +30,34 @@ public enum RoomType {
         return upperBoundary;
     }
 
-    private void setLowerBoundary(int lowerBoundary) {
-        this.lowerBoundary = lowerBoundary;
-    }
-
-    private void setUpperBoundary(int upperBoundary) {
-        this.upperBoundary = upperBoundary;
+    private void setBoundaries(Range<Integer> boundaries) {
+        this.lowerBoundary = boundaries.lowerEndpoint();
+        this.upperBoundary = boundaries.upperEndpoint();
     }
 
     @Configuration
-    @PropertySource(value={"classpath:price.properties"})
+    @PropertySource(value = {"classpath:price.properties"})
     public static class PriceConfig {
         @Value("${economy.lowerBound:1}")
         private int economyLowerBound;
         @Value("${economy.upperBound:100}")
         private int economyUpperBound;
+        @Value("${premium.lowerBound:100}")
+        private int premiumLowerBound;
+        @Value("${premium.upperBound:#{T(java.lang.Integer).MAX_VALUE}}")
+        private int premiumUpperBound;
 
         @PostConstruct
         public void postConstruct() {
-            ECONOMY.setLowerBoundary(economyLowerBound);
-            ECONOMY.setUpperBoundary(economyUpperBound);
-            PREMIUM.setLowerBoundary(economyUpperBound);
+            var economyRange = Range.closedOpen(economyLowerBound, economyUpperBound);
+            var premiumRange = Range.closedOpen(premiumLowerBound, premiumUpperBound);
+
+            if (!economyRange.intersection(premiumRange).isEmpty()) {
+                throw new IllegalArgumentException(PRICE_BOUNDARIES_VALIDATION);
+            }
+
+            ECONOMY.setBoundaries(economyRange);
+            PREMIUM.setBoundaries(premiumRange);
         }
     }
 }
