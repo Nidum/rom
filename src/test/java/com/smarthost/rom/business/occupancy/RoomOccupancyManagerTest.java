@@ -78,7 +78,9 @@ public class RoomOccupancyManagerTest {
                 // Multiple economy customers of same desired paying price, adjusted to premium
                 Arguments.of(List.of(40, 45, 50, 55, 60, 60, 300, 400), Map.of(PREMIUM, 3, ECONOMY, 3), Map.of(ECONOMY, List.of(50, 55, 60), PREMIUM, List.of(60, 300, 400))),
                 // Multiple economy customers of same desired paying price not assigned to economy
-                Arguments.of(List.of(40, 45, 50, 55, 60, 300, 300, 300, 400), Map.of(PREMIUM, 3, ECONOMY, 3), Map.of(ECONOMY, List.of(50, 55, 60), PREMIUM, List.of(300, 300, 400)))
+                Arguments.of(List.of(40, 45, 50, 55, 60, 300, 300, 300, 400), Map.of(PREMIUM, 3, ECONOMY, 3), Map.of(ECONOMY, List.of(50, 55, 60), PREMIUM, List.of(300, 300, 400))),
+                // Only one economy upgraded
+                Arguments.of(List.of(99, 99, 150), Map.of(PREMIUM, 3, ECONOMY, 1), Map.of(ECONOMY, List.of(99), PREMIUM, List.of(99, 150)))
                 );
     }
 

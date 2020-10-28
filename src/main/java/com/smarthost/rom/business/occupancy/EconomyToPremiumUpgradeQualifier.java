@@ -2,6 +2,7 @@ package com.smarthost.rom.business.occupancy;
 
 import com.smarthost.rom.domain.RoomType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ class EconomyToPremiumUpgradeQualifier extends CustomerTypeQualifier {
                                             List<Integer> allCustomers, CustomerTypeQualifier next) {
         super(roomCountMap, next);
         this.premiumCustomers = premiumCustomers;
-        this.allCustomers = allCustomers;
+        this.allCustomers = new ArrayList<>(allCustomers);
     }
 
     @Override
@@ -27,8 +28,18 @@ class EconomyToPremiumUpgradeQualifier extends CustomerTypeQualifier {
 
     @Override
     protected boolean customerMatchesRoom(int wishedPayment) {
-        var customersLeft = allCustomers.indexOf(wishedPayment);
-        return customersLeft >= roomCountMap.get(ECONOMY) && wishedPayment < getType().getLowerBoundary() &&
-                roomCountMap.get(PREMIUM) > premiumCustomers.size();
+        int indexOf = allCustomers.lastIndexOf(wishedPayment);
+        // All premium used
+        boolean result =
+                // Wished payment is not premium
+                wishedPayment < getType().getLowerBoundary()
+                        // Some premium rooms still left
+                        && roomCountMap.get(PREMIUM) >= premiumCustomers.size() + 1
+                        // All economy rooms will be occupied by others, who'll pay less
+                        && roomCountMap.get(ECONOMY) <= indexOf
+                ;
+
+        allCustomers.remove(indexOf);
+        return result;
     }
 }
